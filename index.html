@@ -177,7 +177,20 @@ function loadVoices(){if(!("speechSynthesis"in window))return;VOICES=speechSynth
 if("speechSynthesis"in window){loadVoices();speechSynthesis.onvoiceschanged=()=>{loadVoices();if(view.name==="settings"||view.name==="cover")render()}}
 function pickVoice(){return VOICES.find(v=>v.name===S.voice)||VOICES[0]||null}
 function robotic(){const v=pickVoice();return !v||/Zira|David|Mark|Heami/i.test(v.name)}
-function say(text,rate){if(!("speechSynthesis"in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate||S.rate;const v=pickVoice();if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+/* Android Chrome and iOS drop an utterance spoken in the same tick as cancel(), so only cancel when busy and speak a moment later */
+function say(text,rate){if(!("speechSynthesis"in window))return;try{const ss=speechSynthesis;
+ const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate||S.rate;u.volume=1;const v=pickVoice();if(v)u.voice=v;
+ if(ss.paused)ss.resume();
+ if(ss.speaking||ss.pending){ss.cancel();setTimeout(()=>ss.speak(u),120)}else ss.speak(u)}catch(e){}}
+/* KakaoTalk's in-app browser has no speech; hand the page to the phone's real browser */
+const IN_KAKAO=/KAKAOTALK/i.test(navigator.userAgent);
+const IN_APP=IN_KAKAO||/NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(navigator.userAgent);
+function openExternal(){const url=location.href;
+ if(IN_KAKAO){location.href="kakaotalk://web/openExternal?url="+encodeURIComponent(url);return}
+ if(/Android/i.test(navigator.userAgent)){location.href="intent://"+url.replace(/^https?:\/\//,"")+"#Intent;scheme=https;package=com.android.chrome;end";return}}
+if(IN_KAKAO&&location.protocol==="https:"&&!sessionStorageGet("triedExt")){sessionStorageSet("triedExt","1");openExternal()}
+function sessionStorageGet(k){try{return sessionStorage.getItem(k)}catch(e){return null}}
+function sessionStorageSet(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -209,8 +222,10 @@ function vCover(){
  <h1>우리 가족<br><span class="hl">화이팅!</span></h1>
  <p class="tag">Listen · Read · Write · Remember</p>
  <div class="words"><span>cat</span><span>ship</span><span>cake</span><span>three</span><span>family</span></div></div>
+ ${IN_APP||!("speechSynthesis"in window)?`<div class="warn">${IN_APP?"카톡(앱) 안에서 열려서 소리가 안 나요.":"이 브라우저는 소리를 지원하지 않아요."} 아래 버튼으로 <b>Chrome</b>(아이폰은 Safari)에서 열어 주세요.</div>
+ ${IN_APP?`<button class="btn kakao" data-act="external">Chrome으로 열기</button>`:""}`:""}
  <button class="btn" data-act="profiles">시작하기</button>
- ${robotic()?`<div class="note">이 화면에서는 발음이 기계음처럼 들릴 수 있어요. <b>Chrome</b>으로 열면 훨씬 자연스러운 목소리(Google US English)가 나와요.</div>`:""}
+ ${robotic()&&!IN_APP?`<div class="note">이 화면에서는 발음이 기계음처럼 들릴 수 있어요. <b>Chrome</b>으로 열면 훨씬 자연스러운 목소리(Google US English)가 나와요.</div>`:""}
  <p class="sub" style="text-align:center">처음 시작할 때 ⚙ 설정에서 발음이 잘 들리는지 확인해 주세요.</p>`}
 
 function vProfiles(){
@@ -325,7 +340,8 @@ function vSettings(){
  <label for="rate">빠르기</label><div class="row"><input type="range" id="rate" min="0.5" max="1.2" step="0.1" value="${S.rate}"><span id="rateo" style="font-family:var(--en);min-width:32px">${S.rate.toFixed(1)}</span></div>
  <div class="grid">${["cat","ship","map","three"].map(w=>`<button class="btn ghost" data-act="test" data-w="${w}" style="font-family:var(--en)">🔊 ${w}</button>`).join("")}</div>
  <div class="switch"><label for="hint">쓰기 문제에서 첫 글자 힌트 보기</label><input type="checkbox" id="hint" ${S.hint?"checked":""}></div>
- <div class="note">아이폰은 옆면 무음 스위치가 켜져 있으면 소리가 안 나요. Google 목소리는 인터넷이 연결되어 있어야 나와요.</div></div>
+ <div class="note">소리가 안 나면: ① 휴대폰 <b>미디어 볼륨</b>(음악·동영상 볼륨)을 올려 주세요. 벨소리 볼륨과 따로예요. ② 아이폰은 옆면 무음 스위치를 꺼 주세요. ③ 카톡 안이 아니라 Chrome/Safari에서 열어 주세요.</div>
+ <p class="sub" style="font-family:var(--en)">voices: ${VOICES.length} · ${esc(pickVoice()?pickVoice().name:"none")} · ${IN_APP?"in-app":"browser"}</p></div>
  <button class="btn" data-act="closeset">확인</button>`}
 
 /* ---------- flows ---------- */
@@ -434,6 +450,7 @@ function act(a,el){
   case"settings":prevView=view;go("settings",{back:"closeset"});break;
   case"closeset":if(prevView){view=prevView;prevView=null;render()}else go("cover");break;
   case"test":say(el.dataset.w);break;
+  case"external":openExternal();break;
  }
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b||b.disabled||!b.dataset.act)return;act(b.dataset.act,b)});
