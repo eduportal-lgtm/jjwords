@@ -54,8 +54,9 @@ p{margin:0}
 .cover h1{font-family:var(--kr-display);font-weight:400;font-size:clamp(44px,13vw,68px);line-height:1.08;padding-left:14px}
 .cover h1 .hl{background:linear-gradient(transparent 58%,rgba(255,227,110,.85) 58% 92%,transparent 92%)}
 .cover .tag{font-family:var(--en);font-size:15px;opacity:.85;padding-left:14px}
-.cover .words{display:flex;flex-wrap:wrap;gap:8px;padding-left:14px}
-.cover .words span{font-family:var(--en);font-size:13px;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:3px 10px}
+.cover .names{display:flex;flex-wrap:wrap;gap:8px;padding-left:14px}
+.cover .names span{font-size:15px;font-weight:600;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 12px;background:rgba(255,255,255,.06)}
+.cover .names b{font-family:serif;font-weight:600;margin-left:5px;letter-spacing:.08em;color:#FFE36E}
 .pick{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;min-height:110px;width:100%}
 .pick .big{font-size:24px;font-weight:700}
 .pick .en{font-family:var(--en);font-size:13px;color:var(--sub);letter-spacing:.06em}
@@ -202,7 +203,7 @@ function stamp(){const d=new Date();return (d.getMonth()+1)+"/"+d.getDate()+" "+
 function norm(s){return String(s).toLowerCase().replace(/[’']/g,"'").replace(/\s+/g," ").trim()}
 function tokens(m){return m.replace(/\([^)]*\)/g,"").split(/[;,]/).map(x=>x.trim()).filter(Boolean)}
 /* words whose Korean meaning shares a token with the target: accepted as correct in typing questions */
-function synonyms(w){const t=new Set(tokens(w[1]));return ELEM.concat(MID).filter(e=>norm(e[0])!==norm(w[0])&&tokens(e[1]).some(x=>t.has(x))).map(e=>norm(e[0]))}
+function synonyms(w){const t=new Set(tokens(w[1]));return ELEM.concat(MID,HIGH).filter(e=>norm(e[0])!==norm(w[0])&&tokens(e[1]).some(x=>t.has(x))).map(e=>norm(e[0]))}
 function slots(word,showFirst){return word.split("").map((c,i)=>c===" "?"&nbsp;":(i===0&&showFirst?esc(c):"_")).join(" ")}
 function diffHtml(target,typed){let o="";for(let i=0;i<target.length;i++){const c=target[i];o+=(typed[i]||"").toLowerCase()===c.toLowerCase()?esc(c):`<span class="x">${esc(c)}</span>`}return o}
 
@@ -220,7 +221,7 @@ function vCover(){
  <div class="eyebrow">OUR WORD NOTEBOOK</div>
  <h1>우리 가족<br><span class="hl">화이팅!</span></h1>
  <p class="tag">Listen · Read · Write · Remember</p>
- <div class="words"><span>cat</span><span>ship</span><span>cake</span><span>three</span><span>family</span></div></div>
+ <div class="names"><span>전지혁 <b>全智赫</b></span><span>전지환 <b>全智煥</b></span></div></div>
  ${IN_APP||!("speechSynthesis"in window)?`<div class="warn">${IN_APP?"카톡(앱) 안에서 열려서 소리가 안 나요.":"이 브라우저는 소리를 지원하지 않아요."} 아래 버튼으로 <b>Chrome</b>(아이폰은 Safari)에서 열어 주세요.</div>
  ${IN_APP?`<button class="btn kakao" data-act="external">Chrome으로 열기</button>`:""}`:""}
  <button class="btn" data-act="profiles">시작하기</button>
