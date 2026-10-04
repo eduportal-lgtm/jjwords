@@ -55,9 +55,6 @@ p{margin:0}
 .cover h1 .hl{background:linear-gradient(transparent 58%,rgba(255,227,110,.85) 58% 92%,transparent 92%)}
 .cover h1 .hanja{display:block;font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans CJK KR","Noto Sans KR",sans-serif;font-size:clamp(30px,8.8vw,46px);font-weight:700;letter-spacing:.03em;white-space:nowrap;margin-bottom:5px}
 .cover .tag{font-family:var(--en);font-size:15px;opacity:.85;padding-left:14px}
-.cover .names{display:flex;flex-wrap:wrap;gap:8px;padding-left:14px}
-.cover .names span{font-size:15px;font-weight:600;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:5px 12px;background:rgba(255,255,255,.06)}
-.cover .names b{font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans CJK KR","Noto Sans KR",sans-serif;font-weight:600;margin-left:5px;letter-spacing:.08em;color:#FFE36E}
 .pick{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;min-height:110px;width:100%}
 .pick .big{font-size:24px;font-weight:700}
 .pick .en{font-family:var(--en);font-size:13px;color:var(--sub);letter-spacing:.06em}
@@ -221,8 +218,7 @@ function vCover(){
  return `<div class="cover"><div class="lines"></div><div class="margin"></div>
  <div class="eyebrow">OUR WORD NOTEBOOK</div>
  <h1><span class="hanja">全智赫 · 全智煥</span><span class="hl">화이팅!</span></h1>
- <p class="tag">Listen · Read · Write · Remember</p>
- <div class="names"><span>전지혁</span><span>전지환</span></div></div>
+ <p class="tag">Listen · Read · Write · Remember</p></div>
  ${IN_APP||!("speechSynthesis"in window)?`<div class="warn">${IN_APP?"카톡(앱) 안에서 열려서 소리가 안 나요.":"이 브라우저는 소리를 지원하지 않아요."} 아래 버튼으로 <b>Chrome</b>(아이폰은 Safari)에서 열어 주세요.</div>
  ${IN_APP?`<button class="btn kakao" data-act="external">Chrome으로 열기</button>`:""}`:""}
  <button class="btn" data-act="profiles">시작하기</button>
